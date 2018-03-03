@@ -1,14 +1,17 @@
 import React from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+
+import './index.css'
 
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       blogs: [],
-      error: null,
+      notification: null,
       username: '',
       password: '',
       user: null,
@@ -31,7 +34,15 @@ class App extends React.Component {
     }
   } 
 
+  displayNotification = (notification) => {
+    this.setState({notification: notification})
+    setTimeout(() => {
+      this.setState({notification: null})
+    }, 3000)
+  }
+
   addBlog = (event) => {
+    this.displayNotification("Blog added")
     event.preventDefault()
     const blogObject = {
       title: this.state.newTitle,
@@ -43,7 +54,7 @@ class App extends React.Component {
       .create(blogObject)
       .then(newBlog => {
         this.setState({
-          username: ''
+          blogs: this.state.blogs.concat(newBlog)
         })
       })
   }
@@ -62,12 +73,7 @@ class App extends React.Component {
       this.setState({ username: '', password: '', user})
 
     } catch(exception) {
-      this.setState({
-        error: 'invalid username or password',
-      })
-      setTimeout(() => {
-        this.setState({ error: null })
-      }, 5000)
+      this.displayNotification("Invalid username or password")
     }
   }
 
@@ -84,6 +90,7 @@ class App extends React.Component {
 
   loginForm = () => (
     <div>
+      <Notification message={this.state.notification}/>
       <h2>Kirjaudu sovellukseen</h2>
       <form onSubmit={this.login}>
         <div>
@@ -101,6 +108,7 @@ class App extends React.Component {
 
   blogList = () => (
     <div>
+        <Notification message={this.state.notification}/>
         <p>{this.state.user.name} logged in</p>
         <button type="submit" onClick={this.logout}>kirjaudu ulos</button>
 
