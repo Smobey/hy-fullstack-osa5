@@ -1,8 +1,13 @@
 import React from 'react'
+
 import Blog from './components/Blog'
-import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+
+import Notification from './components/Notification'
+import Togglable from './components/Togglable'
+import LoginForm from './components/LoginForm'
+import AddBlog from './components/AddBlog'
 
 import './index.css'
 
@@ -12,6 +17,7 @@ class App extends React.Component {
     this.state = {
       blogs: [],
       notification: null,
+      loginVisible: false,
       username: '',
       password: '',
       user: null,
@@ -88,59 +94,60 @@ class App extends React.Component {
     window.localStorage.clear()
   }
 
-  loginForm = () => (
-    <div>
-      <Notification message={this.state.notification}/>
-      <h2>Kirjaudu sovellukseen</h2>
-      <form onSubmit={this.login}>
-        <div>
-          username
-          <input type="text" name="username" value={this.state.username} onChange={this.handleFieldChange}/>
-        </div>
-        <div>
-          password
-          <input type="password" name="password" value={this.state.password} onChange={this.handleFieldChange}/>
-        </div>
-        <button type="submit">log in</button>
-      </form>
-    </div>
-  )
-
-  blogList = () => (
-    <div>
-        <Notification message={this.state.notification}/>
-        <p>{this.state.user.name} logged in</p>
-        <button type="submit" onClick={this.logout}>kirjaudu ulos</button>
-
-        <h2>create new</h2>
-        <form onSubmit={this.addBlog}>
-        <div>
-          title
-          <input type="text" name="newTitle" value={this.state.newTitle} onChange={this.handleFieldChange}/>
-        </div>
-        <div>
-          author
-          <input type="text" name="newAuthor" value={this.state.newAuthor} onChange={this.handleFieldChange}/>
-        </div>
-        <div>
-          url
-          <input type="text" name="newUrl" value={this.state.newUrl} onChange={this.handleFieldChange}/>
-        </div>
-        <button type="submit">create</button>
-      </form>
-
-        <h2>blogs</h2>
-        {this.state.blogs.map(blog => 
-          <Blog key={blog._id} blog={blog}/>
-        )}
-    </div>
-  )
-
   render() {
-    if (this.state.user === null) {
-      return (this.loginForm())
-    }
-    return (this.blogList())
+    console.log(this.state.newTitle)
+    const loginForm = () => (
+      <Togglable buttonLabel="login">
+        <LoginForm
+          visible={this.state.visible}
+          username={this.state.username}
+          password={this.state.password}
+          handleChange={this.handleFieldChange}
+          handleSubmit={this.login}
+        />
+      </Togglable>
+    )
+
+    const addBlog = () => (
+      <Togglable buttonLabel="add blog">
+        <AddBlog
+          visible={this.state.visible}
+          title={this.state.newTitle}
+          author={this.state.newAuthor}
+          url={this.state.newUrl}
+          handleChange={this.handleFieldChange}
+          handleSubmit={this.addBlog}
+        />
+      </Togglable>
+    )
+
+    const userInfo = () => (
+      <div>
+          <p>{this.state.user.name} logged in</p>
+          <button type="submit" onClick={this.logout}>kirjaudu ulos</button>
+      </div>
+    )
+
+    const blogList = () => (
+      <div>
+          <h2>blogs</h2>
+          {this.state.blogs.map(blog => 
+            <Blog key={blog._id} blog={blog}/>
+          )}
+      </div>
+    )
+    
+    return (
+      <div>
+        <Notification message={this.state.notification}/>
+
+        {this.state.user === null && loginForm()}
+
+        {this.state.user !== null && userInfo()}
+        {this.state.user !== null && addBlog()}
+        {this.state.user !== null && blogList()}
+      </div>
+    )
   }
 
 }
